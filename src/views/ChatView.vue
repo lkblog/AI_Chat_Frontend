@@ -115,9 +115,21 @@
               v-model="inputMessage"
               type="text"
               placeholder="发送消息..."
-              :disabled="chatStore.sending"
+              :disabled="chatStore.sending || chatStore.polishing"
             />
-            <button type="submit" :disabled="!inputMessage.trim() || chatStore.sending">
+            <button
+              type="button"
+              class="polish-btn"
+              :disabled="!inputMessage.trim() || chatStore.sending || chatStore.polishing"
+              @click="polishInput"
+              title="使用AI润色输入内容"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+              </svg>
+            </button>
+            <button type="submit" :disabled="!inputMessage.trim() || chatStore.sending || chatStore.polishing">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <line x1="22" y1="2" x2="11" y2="13"></line>
                 <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -202,6 +214,15 @@ const sendMessage = async () => {
   inputMessage.value = ''
   await chatStore.sendMessage(message)
   scrollToBottom()
+}
+
+// 润色输入内容
+const polishInput = async () => {
+  if (!inputMessage.value.trim() || chatStore.polishing) return
+  const polished = await chatStore.polishMessage(inputMessage.value.trim())
+  if (polished) {
+    inputMessage.value = polished
+  }
 }
 
 // 退出登录
@@ -539,6 +560,16 @@ const handleLogout = () => {
 .input-form button:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.input-form .polish-btn {
+  background: transparent;
+  color: #667eea;
+  border: 1px solid #667eea;
+}
+
+.input-form .polish-btn:hover:not(:disabled) {
+  background: rgba(102, 126, 234, 0.1);
 }
 
 /* 无对话选中 */

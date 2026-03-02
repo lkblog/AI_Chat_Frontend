@@ -74,7 +74,19 @@ export const authApi = {
 }
 
 // Chat API
-export const chatApi = {
+type ChatApi = {
+  createChat: (data: CreateChatRequest) => ReturnType<typeof api.post<ApiResponse<Chat>>>
+  getChats: (page?: number, pageSize?: number) => ReturnType<typeof api.get<ApiResponse<PaginatedResponse<Chat>>>>
+  getChatById: (id: number) => ReturnType<typeof api.get<ApiResponse<any>>>
+  updateChat: (id: number, title: string) => ReturnType<typeof api.put<ApiResponse<Chat>>>
+  deleteChat: (id: number) => ReturnType<typeof api.delete<ApiResponse<any>>>
+  sendMessage: (id: number, data: SendMessageRequest) => ReturnType<typeof api.post<ApiResponse<SendMessageResponse>>>
+  sendMessageStream: (id: number, data: SendMessageRequest, onChunk: (chunk: string) => void) => Promise<void>
+  getMessages: (id: number, page?: number, pageSize?: number) => ReturnType<typeof api.get<ApiResponse<PaginatedResponse<Message>>>>
+  polishMessage: (content: string) => ReturnType<typeof api.post<ApiResponse<{ original: string; polished: string }>>>
+}
+
+export const chatApi: ChatApi = {
   // 创建新对话
   createChat: (data: CreateChatRequest) =>
     api.post<ApiResponse<Chat>>('/chats', data),
@@ -167,7 +179,11 @@ export const chatApi = {
   getMessages: (id: number, page = 1, pageSize = 50) =>
     api.get<ApiResponse<PaginatedResponse<Message>>>(`/chats/${id}/messages`, {
       params: { page, pageSize }
-    })
+    }),
+
+  // 润色消息内容
+  polishMessage: (content: string) =>
+    api.post<ApiResponse<{ original: string; polished: string }>>('/chats/polish', { content })
 }
 
 export default api

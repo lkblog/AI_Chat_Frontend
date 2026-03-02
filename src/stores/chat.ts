@@ -10,6 +10,7 @@ export const useChatStore = defineStore('chat', () => {
   const messages = ref<Message[]>([])
   const loading = ref(false)
   const sending = ref(false)
+  const polishing = ref(false)
   const error = ref<string | null>(null)
 
   // Getters
@@ -222,12 +223,34 @@ export const useChatStore = defineStore('chat', () => {
     messages.value = []
   }
 
+  // 润色消息内容
+  const polishMessage = async (content: string) => {
+    polishing.value = true
+    error.value = null
+    try {
+      const response = await chatApi.polishMessage(content)
+      const data = response.data
+      if (data.success && data.data) {
+        return data.data.polished || data.data.original
+      } else {
+        error.value = data.message || '润色失败'
+        return null
+      }
+    } catch (err: any) {
+      error.value = err.response?.data?.message || '润色失败'
+      return null
+    } finally {
+      polishing.value = false
+    }
+  }
+
   return {
     chats,
     currentChat,
     messages,
     loading,
     sending,
+    polishing,
     error,
     hasChats,
     fetchChats,
@@ -236,6 +259,7 @@ export const useChatStore = defineStore('chat', () => {
     updateChat,
     deleteChat,
     sendMessage,
-    clearCurrentChat
+    clearCurrentChat,
+    polishMessage
   }
 })
