@@ -87,7 +87,9 @@
               </template>
             </div>
             <div class="message-content">
-              <div class="message-text">{{ message.content }}</div>
+              <div class="message-text">
+                <MarkdownContent :content="message.content" />
+              </div>
             </div>
           </div>
 
@@ -162,6 +164,7 @@ import { ref, onMounted, nextTick, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
 import { useChatStore } from '@/stores/chat'
+import MarkdownContent from '@/components/MarkdownContent.vue'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -478,7 +481,6 @@ const handleLogout = () => {
 .message-text {
   font-size: 14px;
   line-height: 1.6;
-  white-space: pre-wrap;
   word-break: break-word;
 }
 
